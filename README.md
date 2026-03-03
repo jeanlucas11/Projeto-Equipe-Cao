@@ -9,7 +9,7 @@ python init_db.py
 python app.py
 ```
 
-Acesse: http://localhost:8080
+Acesse: http://localhost:8000
 
 ## Funcionalidades
 
