@@ -28,6 +28,17 @@
         <input type="text" value="{{ demanda[4] }}" disabled>
     </div>
     <br>
+
+    <div>
+        <label>Nível Prioridade:</label><br>
+        <select name="prioridade" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="Alta" {% if demanda[5] == 'Alta' %} selected {% endif %}>Alta</option>
+            <option value="Média" {% if demanda[5] == 'Média' %} selected {% endif %}>Média</option>
+            <option value="Baixa" {% if demanda[5] == 'Baixa' %} selected {% endif %}>Baixa</option>
+        </select>
+    </div>
+    <br>
     
     <button type="submit">Atualizar</button>
     <a href="/"><button type="button">Cancelar</button></a>

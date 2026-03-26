@@ -8,6 +8,7 @@
     <thead>
         <tr bgcolor="#cccccc">
             <th>ID</th>
+            <th>Nível de Prioridade</th>
             <th>Título</th>
             <th>Solicitante</th>
             <th>Data</th>
@@ -18,6 +19,7 @@
         {% for demanda in demandas %}
         <tr>
             <td>{{ demanda[0] }}</td>
+            <td>{{ demanda[5] }}</td>
             <td>{{ demanda[1] }}</td>
             <td>{{ demanda[3] }}</td>
             <td>{{ demanda[4] }}</td>

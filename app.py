@@ -16,7 +16,9 @@ def get_db():
 def index():
     conn = sqlite3.connect('demandas.db')
     cursor = conn.cursor()
-    demandas = cursor.execute('SELECT * FROM demandas').fetchall()
+    demandas = cursor.execute(
+        'SELECT * FROM demandas ORDER BY CASE nivel_prioridade WHEN "Alta" THEN 1 WHEN "Média" THEN 2 WHEN "Baixa" THEN 3 END, data_criacao DESC'
+    ).fetchall()
     conn.close()
     return render_template('index.html', demandas=demandas)
 
@@ -27,13 +29,14 @@ def nova_demanda():
         titulo = request.form['titulo']
         descricao = request.form['descricao']
         solicitante = request.form['solicitante']
+        prioridade = request.form.get('prioridade')
 
 
         conn = sqlite3.connect('demandas.db')
         cursor = conn.cursor()
 
         cursor.execute(
-            f"INSERT INTO demandas (titulo, descricao, solicitante, data_criacao) VALUES ('{titulo}', '{descricao}', '{solicitante}', '{datetime.now()}')")
+            f"INSERT INTO demandas (titulo, descricao, solicitante, data_criacao, nivel_prioridade) VALUES ('{titulo}', '{descricao}', '{solicitante}', '{datetime.now()}', '{prioridade}')")
         conn.commit()
         conn.close()
 
@@ -52,9 +55,10 @@ def editar(id):
         titulo = request.form['titulo']
         descricao = request.form['descricao']
         solicitante = request.form['solicitante']
+        prioridade = request.form.get('prioridade')    
 
         cursor.execute(
-            f"UPDATE demandas SET titulo='{titulo}', descricao='{descricao}', solicitante='{solicitante}' WHERE id={id}")
+            f"UPDATE demandas SET titulo='{titulo}', descricao='{descricao}', solicitante='{solicitante}', nivel_prioridade='{prioridade}' WHERE id={id}")
         conn.commit()
         conn.close()
         return redirect('/')

@@ -7,11 +7,12 @@ cursor = conn.cursor()
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS demandas (
-    id INTEGER,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo TEXT,
     descricao TEXT,
     solicitante TEXT,
-    data_criacao TEXT
+    data_criacao TEXT,
+    nivel_prioridade TEXT
 )
 ''')
 
@@ -26,12 +27,28 @@ CREATE TABLE IF NOT EXISTS comentarios (
 )
 ''')
 
+cursor.execute("DELETE FROM demandas")
+cursor.execute("DELETE FROM comentarios")
 
-cursor.execute("INSERT INTO demandas VALUES (1, 'Corrigir bug no login', 'Usuários não conseguem fazer login', 'João Silva', '2024-01-15 10:30:00')")
-cursor.execute("INSERT INTO demandas VALUES (2, 'Implementar relatório de vendas', 'Precisamos de um relatório mensal', 'Maria Santos', '2024-01-16 14:20:00')")
-cursor.execute("INSERT INTO demandas VALUES (3, 'Melhorar performance', 'Sistema está lento', 'Pedro Costa', '2024-01-17 09:15:00')")
+cursor.execute("""
+INSERT INTO demandas (titulo, descricao, solicitante, data_criacao, nivel_prioridade)
+VALUES (?, ?, ?, ?, ?)
+""", ('Corrigir bug no login', 'Usuários não conseguem fazer login', 'João Silva', '2024-01-15 10:30:00', 'Alta'))
 
-cursor.execute("INSERT INTO demandas VALUES (5, 'Adicionar filtros', 'Usuários querem filtrar demandas', 'Ana Lima', '2024-01-18 11:00:00')")
+cursor.execute("""
+INSERT INTO demandas (titulo, descricao, solicitante, data_criacao, nivel_prioridade)
+VALUES (?, ?, ?, ?, ?)
+""", ('Implementar relatório de vendas', 'Precisamos de um relatório mensal', 'Maria Santos', '2024-01-16 14:20:00', 'Média '))
+
+cursor.execute("""
+INSERT INTO demandas (titulo, descricao, solicitante, data_criacao, nivel_prioridade)
+VALUES (?, ?, ?, ?, ?)
+""", ('Melhorar performance', 'Sistema está lento', 'Pedro Costa', '2024-01-17 09:15:00', 'Baixa'))
+
+cursor.execute("""
+INSERT INTO demandas (titulo, descricao, solicitante, data_criacao, nivel_prioridade)
+VALUES (?, ?, ?, ?, ?)
+""", ('Adicionar filtros', 'Usuários querem filtrar demandas', 'Ana Lima', '2024-01-18 11:00:00', 'Média'))
 
 cursor.execute("INSERT INTO comentarios VALUES (1, 1, 'Vou investigar esse bug', 'Tech Team', '2024-01-15 11:00:00')")
 cursor.execute("INSERT INTO comentarios VALUES (2, 1, 'Bug corrigido na branch develop', 'Desenvolvedor', '2024-01-15 16:30:00')")
