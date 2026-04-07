@@ -1,44 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Detalhes da Demanda #{{ demanda[0] }}</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0;">Detalhes da Demanda #{{ demanda[0] }}</h2>
+    <div>
+        <a href="/editar/{{ demanda[0] }}" class="btn">Editar</a>
+        <a href="/" class="btn btn-secondary">Voltar</a>
+    </div>
+</div>
 
-<div style="border:1px solid #ccc; padding:15px; margin-bottom:20px;">
+<div class="detail-card">
     <h3>{{ demanda[1] }}</h3>
     <p><strong>Descrição:</strong></p>
-    <p>{{ demanda[2] }}</p>
+    <p style="white-space: pre-wrap; margin-bottom: 20px; color: var(--text-muted);">{{ demanda[2] }}</p>
     
-    <p><strong>Solicitante:</strong> {{ demanda[3] }}</p>
-    <p><strong>Data de Criação:</strong> {{ demanda[4] }}</p>
-    <p><strong>Nível de Prioridade:</strong> {{ demanda[5] }}</p>
-    
-    <br>
-    <a href="/editar/{{ demanda[0] }}"><button>Editar</button></a>
-    <a href="/"><button>Voltar</button></a>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #fff; padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+        <p><strong>Solicitante:</strong><br>{{ demanda[3] }}</p>
+        <p><strong>Data de Criação:</strong><br>{{ demanda[4] }}</p>
+        <p><strong>Nível de Prioridade:</strong><br>
+            {% if demanda[5]|lower == 'alta' %}
+                <span class="badge badge-alta">Alta</span>
+            {% elif demanda[5]|lower in ['média','media'] %}
+                <span class="badge badge-media">Média</span>
+            {% else %}
+                <span class="badge badge-baixa">Baixa</span>
+            {% endif %}
+        </p>
+    </div>
 </div>
 
-<h3>Comentários</h3>
+<h3>Comentários ({{ comentarios|length }})</h3>
 
-{% for comentario in comentarios %}
-<div style="background:#f0f0f0; padding:10px; margin:10px 0;">
-    <p><strong>{{ comentario[3] }}</strong> em {{ comentario[4] }}</p>
-    <p>{{ comentario[2] }}</p>
+<div style="margin-bottom: 30px;">
+    {% for comentario in comentarios %}
+    <div class="comment-card">
+        <p class="meta"><strong>{{ comentario[3] }}</strong> em {{ comentario[4] }}</p>
+        <p>{{ comentario[2] }}</p>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); font-style: italic;">Nenhum comentário adicionado ainda.</p>
+    {% endfor %}
 </div>
-{% endfor %}
 
-<h4>Adicionar Comentário</h4>
-<form method="POST" action="/adicionar_comentario/{{ demanda[0] }}">
-    <div>
-        <label>Seu nome:</label><br>
-        <input type="text" name="autor" size="30">
-    </div>
-    <br>
-    <div>
-        <label>Comentário:</label><br>
-        <textarea name="comentario" rows="4" cols="50"></textarea>
-    </div>
-    <br>
-    <button type="submit">Enviar Comentário</button>
-</form>
+<div style="background: var(--bg-color); padding: 25px; border-radius: 8px;">
+    <h4 style="margin-top: 0;">Adicionar Comentário</h4>
+    <form method="POST" action="/adicionar_comentario/{{ demanda[0] }}">
+        <div class="form-group">
+            <label>Seu nome:</label>
+            <input type="text" name="autor" placeholder="Ex: João Silva" required>
+        </div>
+        <div class="form-group">
+            <label>Comentário:</label>
+            <textarea name="comentario" rows="4" placeholder="Escreva seu comentário aqui..." required></textarea>
+        </div>
+        <button type="submit">Enviar Comentário</button>
+    </form>
+</div>
 
 {% endblock %}

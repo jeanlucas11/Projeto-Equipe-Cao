@@ -3,45 +3,43 @@
 {% block content %}
 <h2>Editar Demanda</h2>
 
+<form method="POST" action="/editar/{{ demanda[0] }}" style="max-width: 600px;">
+    <div class="form-group">
+        <label>Título:</label>
+        <input type="text" name="titulo" value="{{ demanda[1] }}" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Descrição:</label>
+        <textarea name="descricao" rows="6" required>{{ demanda[2] }}</textarea>
+    </div>
+    
+    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <label>Solicitante:</label>
+            <input type="text" name="solicitante" value="{{ demanda[3] }}" required>
+        </div>
+        
+        <div>
+            <label>Data de Criação:</label>
+            <input type="text" value="{{ demanda[4] }}" disabled style="background-color: #e2e8f0; cursor: not-allowed;">
+        </div>
+    </div>
 
-<form method="POST" action="/editar/{{ demanda[0] }}">
-    <div>
-        <label>Título:</label><br>
-        <input type="text" name="titulo" value="{{ demanda[1] }}" size="50">
-    </div>
-    <br>
-    
-    <div>
-        <label>Descrição:</label><br>
-        <textarea name="descricao" rows="5" cols="50">{{ demanda[2] }}</textarea>
-    </div>
-    <br>
-    
-    <div>
-        <label>Solicitante:</label><br>
-        <input type="text" name="solicitante" value="{{ demanda[3] }}">
-    </div>
-    <br>
-    
-    <div>
-        <label>Data de Criação:</label><br>
-        <input type="text" value="{{ demanda[4] }}" disabled>
-    </div>
-    <br>
-
-    <div>
-        <label>Nível Prioridade:</label><br>
+    <div class="form-group">
+        <label>Nível Prioridade:</label>
         <select name="prioridade" required>
-            <option value="" disabled selected>Selecione</option>
+            <option value="" disabled>Selecione</option>
             <option value="Alta" {% if demanda[5] == 'Alta' %} selected {% endif %}>Alta</option>
             <option value="Média" {% if demanda[5] == 'Média' %} selected {% endif %}>Média</option>
             <option value="Baixa" {% if demanda[5] == 'Baixa' %} selected {% endif %}>Baixa</option>
         </select>
     </div>
-    <br>
     
-    <button type="submit">Atualizar</button>
-    <a href="/"><button type="button">Cancelar</button></a>
+    <div style="margin-top: 30px; display: flex; gap: 10px;">
+        <button type="submit">Atualizar Demanda</button>
+        <a href="/" class="btn btn-secondary">Cancelar</a>
+    </div>
 </form>
 
 {% endblock %}

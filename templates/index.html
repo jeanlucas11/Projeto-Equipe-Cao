@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Lista de Demandas</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0;">Lista de Demandas</h2>
+    <a href="/nova_demanda" class="btn">+ Nova Demanda</a>
+</div>
 
-<form method="get" action="/" style="margin-bottom: 15px;">
-    <label><strong>Filtrar por prioridade:</strong></label>
+<form method="get" action="/" class="filter-form">
+    <strong>Filtrar por prioridade:</strong>
 
     <label>
         <input type="checkbox" name="prioridade[]" value="Alta"
@@ -26,16 +29,18 @@
 
     <input type="hidden" name="ordem" value="{{ ordem }}">
 
-    <button type="submit">Filtrar</button>
-    <a href="/"><button type="button">Limpar</button></a>
+    <div style="margin-left: auto; display: flex; gap: 10px;">
+        <button type="submit">Filtrar</button>
+        <a href="/" class="btn btn-secondary">Limpar</a>
+    </div>
 </form>
 
-<table border="1" cellpadding="10" cellspacing="0" width="100%">
+<table>
     <thead>
-        <tr bgcolor="#cccccc">
+        <tr>
             <th>ID</th>
             <th>
-                <a href="/?{% for p in prioridades_selecionadas %}prioridade[]={{p}}&{% endfor %}ordem={% if ordem == 'asc' %}desc{% else %}asc{% endif %}">
+                <a href="/?{% for p in prioridades_selecionadas %}prioridade[]={{p}}&{% endfor %}ordem={% if ordem == 'asc' %}desc{% else %}asc{% endif %}" style="color: inherit;">
                     Prioridade {% if ordem == 'asc' %}↑{% else %}↓{% endif %}
                 </a>
             </th>
@@ -49,33 +54,31 @@
     <tbody>
         {% for demanda in demandas %}
         <tr>
-            <td>{{ demanda['id'] }}</td>
+            <td>#{{ demanda['id'] }}</td>
             <td>
                 {% if demanda['nivel_prioridade']|lower == 'alta' %}
-                    <span style="color:red; font-weight:bold;">Alta</span>
+                    <span class="badge badge-alta">Alta</span>
                 {% elif demanda['nivel_prioridade']|lower in ['média','media'] %}
-                    <span style="color:orange; font-weight:bold;">Média</span>
+                    <span class="badge badge-media">Média</span>
                 {% else %}
-                    <span style="color:green; font-weight:bold;">Baixa</span>
+                    <span class="badge badge-baixa">Baixa</span>
                 {% endif %}
             </td>
-            <td>{{ demanda['titulo'] }}</td>
+            <td><strong>{{ demanda['titulo'] }}</strong></td>
             <td>{{ demanda['solicitante'] }}</td>
             <td>{{ demanda['data_criacao'] }}</td>
-            <td>
-                <a href="/detalhes/{{ demanda['id'] }}">Ver</a> |
-                <a href="/editar/{{ demanda['id'] }}">Editar</a> |
-                <a href="/deletar/{{ demanda['id'] }}" style="color:red;">Deletar</a>
+            <td class="action-links">
+                <a href="/detalhes/{{ demanda['id'] }}">Ver</a>
+                <a href="/editar/{{ demanda['id'] }}">Editar</a>
+                <a href="/deletar/{{ demanda['id'] }}" class="delete-link">Deletar</a>
             </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">Nenhuma demanda encontrada.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-
-<br><br>
-
-<a href="/nova_demanda">
-    <button>+ Nova Demanda</button>
-</a>
 
 {% endblock %}
