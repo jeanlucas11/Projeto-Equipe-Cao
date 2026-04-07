@@ -3,40 +3,79 @@
 {% block content %}
 <h2>Lista de Demandas</h2>
 
+<form method="get" action="/" style="margin-bottom: 15px;">
+    <label><strong>Filtrar por prioridade:</strong></label>
+
+    <label>
+        <input type="checkbox" name="prioridade[]" value="Alta"
+        {% if 'Alta' in prioridades_selecionadas %}checked{% endif %}>
+        Alta
+    </label>
+
+    <label>
+        <input type="checkbox" name="prioridade[]" value="Média"
+        {% if 'Média' in prioridades_selecionadas %}checked{% endif %}>
+        Média
+    </label>
+
+    <label>
+        <input type="checkbox" name="prioridade[]" value="Baixa"
+        {% if 'Baixa' in prioridades_selecionadas %}checked{% endif %}>
+        Baixa
+    </label>
+
+    <input type="hidden" name="ordem" value="{{ ordem }}">
+
+    <button type="submit">Filtrar</button>
+    <a href="/"><button type="button">Limpar</button></a>
+</form>
 
 <table border="1" cellpadding="10" cellspacing="0" width="100%">
     <thead>
         <tr bgcolor="#cccccc">
             <th>ID</th>
-            <th>Nível de Prioridade</th>
+            <th>
+                <a href="/?{% for p in prioridades_selecionadas %}prioridade[]={{p}}&{% endfor %}ordem={% if ordem == 'asc' %}desc{% else %}asc{% endif %}">
+                    Prioridade {% if ordem == 'asc' %}↑{% else %}↓{% endif %}
+                </a>
+            </th>
             <th>Título</th>
             <th>Solicitante</th>
             <th>Data</th>
             <th>Ações</th>
         </tr>
     </thead>
+
     <tbody>
         {% for demanda in demandas %}
         <tr>
-            <td>{{ demanda[0] }}</td>
-            <td>{{ demanda[5] }}</td>
-            <td>{{ demanda[1] }}</td>
-            <td>{{ demanda[3] }}</td>
-            <td>{{ demanda[4] }}</td>
+            <td>{{ demanda['id'] }}</td>
             <td>
-                <a href="/detalhes/{{ demanda[0] }}">Ver</a>
-                |
-                <a href="/editar/{{ demanda[0] }}">Editar</a>
-                |
-                <a href="/deletar/{{ demanda[0] }}" style="color:red;">Deletar</a>
+                {% if demanda['nivel_prioridade']|lower == 'alta' %}
+                    <span style="color:red; font-weight:bold;">Alta</span>
+                {% elif demanda['nivel_prioridade']|lower in ['média','media'] %}
+                    <span style="color:orange; font-weight:bold;">Média</span>
+                {% else %}
+                    <span style="color:green; font-weight:bold;">Baixa</span>
+                {% endif %}
+            </td>
+            <td>{{ demanda['titulo'] }}</td>
+            <td>{{ demanda['solicitante'] }}</td>
+            <td>{{ demanda['data_criacao'] }}</td>
+            <td>
+                <a href="/detalhes/{{ demanda['id'] }}">Ver</a> |
+                <a href="/editar/{{ demanda['id'] }}">Editar</a> |
+                <a href="/deletar/{{ demanda['id'] }}" style="color:red;">Deletar</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-
 <br><br>
-<a href="/nova_demanda"><button>+ Nova Demanda</button></a>
+
+<a href="/nova_demanda">
+    <button>+ Nova Demanda</button>
+</a>
 
 {% endblock %}
