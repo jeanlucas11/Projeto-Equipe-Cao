@@ -17,7 +17,12 @@
     <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
             <label>Solicitante:</label>
-            <input type="text" name="solicitante" value="{{ demanda[3] }}" required>
+            <select name="solicitante" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                <option value="" disabled>Selecione o solicitante</option>
+                {% for solicitante in solicitantes %}
+                <option value="{{ solicitante['nome'] }}" {% if demanda[3] == solicitante['nome'] %} selected {% endif %}>{{ solicitante['nome'] }}</option>
+                {% endfor %}
+            </select>
         </div>
         
         <div>

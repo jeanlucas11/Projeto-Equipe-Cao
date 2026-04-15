@@ -27,8 +27,21 @@ CREATE TABLE IF NOT EXISTS comentarios (
 )
 ''')
 
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS solicitantes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    senha TEXT NOT NULL
+)
+''')
+
 cursor.execute("DELETE FROM demandas")
 cursor.execute("DELETE FROM comentarios")
+cursor.execute("DELETE FROM solicitantes")
+
+
+cursor.execute("INSERT INTO solicitantes (nome, senha) VALUES ('Admin', 'admin')")
+
 
 cursor.execute("""
 INSERT INTO demandas (titulo, descricao, solicitante, data_criacao, nivel_prioridade)

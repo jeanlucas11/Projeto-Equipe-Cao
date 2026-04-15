@@ -94,7 +94,12 @@ def nova_demanda():
         flash('Demanda salva!')
         return redirect(url_for('index'))
 
-    return render_template('nova_demanda.html')
+    conn = get_db()
+    cursor = conn.cursor()
+    solicitantes = cursor.execute('SELECT * FROM solicitantes').fetchall()
+    conn.close()
+
+    return render_template('nova_demanda.html', solicitantes = solicitantes)
 
 
 @app.route('/editar/<int:id>', methods=['GET', 'POST'])
@@ -128,8 +133,10 @@ def editar(id):
         'SELECT * FROM demandas WHERE id=?', (id,)
     ).fetchone()
 
+    solicitantes = cursor.execute('SELECT * FROM solicitantes').fetchall()
+
     conn.close()
-    return render_template('editar.html', demanda=demanda)
+    return render_template('editar.html', demanda=demanda, solicitantes=solicitantes)
 
 
 @app.route('/deletar/<int:id>')
@@ -184,6 +191,54 @@ def adicionar_comentario(demanda_id):
     conn.close()
 
     return redirect(url_for('detalhes', id=demanda_id))
+
+
+@app.route('/solicitantes')
+def solicitantes():
+    conn = get_db()
+    cursor = conn.cursor()
+    solicitantes = cursor.execute('SELECT * FROM solicitantes').fetchall()
+    conn.close()
+    return render_template('solicitantes.html', solicitantes=solicitantes)
+
+
+@app.route('/novo_solicitante', methods=['GET', 'POST'])
+def novo_solicitante():
+    if request.method == 'POST':
+        nome = request.form['nome']
+        senha = request.form['senha']
+
+        conn = get_db()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            '''
+            INSERT INTO solicitantes (nome, senha)
+            VALUES (?, ?)
+            ''',
+            (nome, senha)
+        )
+
+        conn.commit()
+        conn.close()
+
+        flash('Solicitante criado com sucesso!')
+        return redirect(url_for('solicitantes'))
+
+    return render_template('novo_solicitante.html')
+
+
+@app.route('/deletar_solicitante/<int:id>')
+def deletar_solicitante(id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute('DELETE FROM solicitantes WHERE id=?', (id,))
+    conn.commit()
+    conn.close()
+
+    flash('Solicitante deletado!')
+    return redirect(url_for('solicitantes'))
 
 
 if __name__ == '__main__':
