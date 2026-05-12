@@ -13,9 +13,33 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+def atualizar_prioridades_atrasadas():
+    conn = get_db()
+    cursor = conn.cursor()
+    demandas = cursor.execute("SELECT id, prazo FROM demandas WHERE nivel_prioridade = 'Alta' AND status NOT IN ('Concluída', 'Cancelada') AND prazo IS NOT NULL").fetchall()
+    
+    agora = datetime.now()
+    ids_to_update = []
+    
+    for d in demandas:
+        try:
+            prazo_dt = datetime.strptime(d['prazo'], '%Y-%m-%d %H:%M:%S')
+            if agora > prazo_dt:
+                ids_to_update.append(d['id'])
+        except ValueError:
+            pass
+            
+    if ids_to_update:
+        placeholders = ','.join(['?'] * len(ids_to_update))
+        cursor.execute(f"UPDATE demandas SET nivel_prioridade = 'Crítica' WHERE id IN ({placeholders})", ids_to_update)
+        conn.commit()
+        
+    conn.close()
+
 
 @app.route('/')
 def index():
+    atualizar_prioridades_atrasadas()
     # pega múltiplas prioridades selecionadas (checkbox)
     prioridades = request.args.getlist('prioridade[]')
 
@@ -258,6 +282,7 @@ def dashboard():
 
 @app.route('/api/dashboard_data')
 def dashboard_data():
+    atualizar_prioridades_atrasadas()
     conn = get_db()
     cursor = conn.cursor()
     
