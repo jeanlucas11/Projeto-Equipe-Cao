@@ -17,10 +17,10 @@
     <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         <div>
             <label>Solicitante:</label>
-            <select name="solicitante" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                <option value="" disabled>Selecione o solicitante</option>
-                {% for solicitante in solicitantes %}
-                <option value="{{ solicitante['nome'] }}" {% if demanda[3] == solicitante['nome'] %} selected {% endif %}>{{ solicitante['nome'] }}</option>
+            <select name="solicitante" required>
+                <option value="" disabled>Selecione um solicitante</option>
+                {% for s in solicitantes %}
+                    <option value="{{ s['nome'] }}" {% if demanda[3] == s['nome'] %} selected {% endif %}>{{ s['nome'] }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -35,10 +35,34 @@
         <label>Nível Prioridade:</label>
         <select name="prioridade" required>
             <option value="" disabled>Selecione</option>
+            <option value="Crítica" {% if demanda[5] == 'Crítica' %} selected {% endif %}>Crítica</option>
             <option value="Alta" {% if demanda[5] == 'Alta' %} selected {% endif %}>Alta</option>
             <option value="Média" {% if demanda[5] == 'Média' %} selected {% endif %}>Média</option>
             <option value="Baixa" {% if demanda[5] == 'Baixa' %} selected {% endif %}>Baixa</option>
         </select>
+    </div>
+
+    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <label>Status:</label>
+            <select name="status" required>
+                <option value="Aberta" {% if demanda[6] == 'Aberta' %} selected {% endif %}>Aberta</option>
+                <option value="Concluída" {% if demanda[6] == 'Concluída' %} selected {% endif %}>Concluída</option>
+                <option value="Cancelada" {% if demanda[6] == 'Cancelada' %} selected {% endif %}>Cancelada</option>
+                <option value="Indefinido" {% if demanda[6] == 'Indefinido' or not demanda[6] %} selected {% endif %}>Indefinido</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Responsável:</label>
+            <input type="text" name="responsavel" value="{{ demanda[7] if demanda[7] else '' }}" placeholder="Nome do responsável">
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Prazo Inicial (Opcional):</label>
+        <!-- Formata a data se existir (YYYY-MM-DD) -->
+        <input type="date" name="prazo" value="{{ demanda[9][:10] if demanda[9] else '' }}">
     </div>
     
     <div style="margin-top: 30px; display: flex; gap: 10px;">

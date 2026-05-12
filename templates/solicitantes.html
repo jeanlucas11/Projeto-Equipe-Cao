@@ -1,52 +1,37 @@
-{% extends "base.html" %} {% block content %}
-<div
-  style="
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  "
->
-  <h2>Lista de Solicitantes</h2>
-  <a href="/novo_solicitante" class="btn">Novo Solicitante</a>
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>Solicitantes</h2>
+    <a href="/novo_solicitante" class="btn">Novo Solicitante</a>
 </div>
 
-<div class="table-container">
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nome</th>
-        <th style="width: 150px; text-align: center">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for solicitante in solicitantes %}
-      <tr>
-        <td>#{{ solicitante.id }}</td>
-        <td>{{ solicitante.nome }}</td>
-        <td style="text-align: center">
-          <a
-            href="/deletar_solicitante/{{ solicitante.id }}"
-            class="btn-delete"
-            onclick="
-              return confirm(
-                'Tem certeza que deseja deletar este solicitante?',
-              );
-            "
-            >Deletar</a
-          >
-        </td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="3" style="text-align: center; color: #888; padding: 20px">
-          Nenhum solicitante cadastrado.
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="detail-card">
+    {% if solicitantes %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Senha</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitante in solicitantes %}
+            <tr>
+                <td>#{{ solicitante.id }}</td>
+                <td><strong>{{ solicitante.nome }}</strong></td>
+                <td>{{ solicitante.senha }}</td>
+                <td style="text-align: center">
+                  <a href="/deletar_solicitante/{{ solicitante.id }}" class="btn" style="background:#dc3545;" onclick="return confirm('Deletar este solicitante?');">Deletar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nenhum solicitante cadastrado.</p>
+    {% endif %}
 </div>
-
 {% endblock %}

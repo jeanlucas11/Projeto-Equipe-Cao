@@ -1,51 +1,65 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <h2>Nova Demanda</h2>
 
-<form method="POST" action="/nova_demanda" style="max-width: 600px">
-  <div class="form-group">
-    <label>Título:</label>
-    <input
-      type="text"
-      name="titulo"
-      placeholder="Título descritivo da demanda"
-      required
-    />
-  </div>
+<form method="POST" action="/nova_demanda" style="max-width: 600px;">
+    <div class="form-group">
+        <label>Título:</label>
+        <input type="text" name="titulo" placeholder="Título descritivo da demanda" required>
+    </div>
+    
+    <div class="form-group">
+        <label>Descrição:</label>
+        <textarea name="descricao" rows="6" placeholder="Descreva os detalhes da demanda..." required></textarea>
+    </div>
+    
+    <div class="form-group">
+        <label>Solicitante:</label>
+        <select name="solicitante" required>
+            <option value="" disabled selected>Selecione um solicitante</option>
+            {% for s in solicitantes %}
+                <option value="{{ s['nome'] }}">{{ s['nome'] }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-  <div class="form-group">
-    <label>Descrição:</label>
-    <textarea
-      name="descricao"
-      rows="6"
-      placeholder="Descreva os detalhes da demanda..."
-      required
-    ></textarea>
-  </div>
+    <div class="form-group">
+        <label>Nível Prioridade:</label>
+        <select name="prioridade" required>
+            <option value="" disabled selected>Selecione uma prioridade</option>
+            <option value="Crítica">Crítica</option>
+            <option value="Alta">Alta</option>
+            <option value="Média">Média</option>
+            <option value="Baixa">Baixa</option>
+        </select>
+    </div>
 
-  <div class="form-group">
-    <label>Solicitante:</label>
-    <select name="solicitante" required>
-      <option value="" disabled selected>Selecione o solicitante</option>
-      {% for solicitante in solicitantes %}
-      <option value="{{ solicitante['nome'] }}">{{ solicitante['nome'] }}</option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <div class="form-group">
-    <label>Nível Prioridade:</label>
-    <select name="prioridade" required>
-      <option value="" disabled selected>Selecione uma prioridade</option>
-      <option value="Alta">Alta</option>
-      <option value="Média">Média</option>
-      <option value="Baixa">Baixa</option>
-    </select>
-  </div>
-
-  <div style="margin-top: 30px; display: flex; gap: 10px">
-    <button type="submit">Salvar Demanda</button>
-    <a href="/" class="btn btn-secondary">Cancelar</a>
-  </div>
+    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+            <label>Status:</label>
+            <select name="status" required>
+                <option value="Aberta" selected>Aberta</option>
+                <option value="Concluída">Concluída</option>
+                <option value="Cancelada">Cancelada</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Responsável:</label>
+            <input type="text" name="responsavel" placeholder="Nome do responsável">
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label>Prazo Inicial (Opcional):</label>
+        <input type="date" name="prazo">
+    </div>
+    
+    <div style="margin-top: 30px; display: flex; gap: 10px;">
+        <button type="submit">Salvar Demanda</button>
+        <a href="/" class="btn btn-secondary">Cancelar</a>
+    </div>
 </form>
 
 {% endblock %}

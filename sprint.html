@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Emergencial</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --surface: #101010;
+  --border: #1c1c1c;
+  --accent: #ff3c00;
+  --accent2: #ffb800;
+  --accent3: #00e5ff;
+  --green: #00ff88;
+  --text: #ebebeb;
+  --muted: #444;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+  pointer-events:none; z-index:9000;
+}
+
+/* TICKER */
+.ticker-bar {
+  position:fixed; top:0; left:0; right:0;
+  background: var(--accent); color:#000;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px; font-weight:700;
+  padding:5px 0; overflow:hidden; white-space:nowrap; z-index:200;
+}
+.ticker-inner { display:inline-block; animation: ticker 28s linear infinite; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* COUNTDOWN */
+.countdown-strip {
+  position:fixed; top:24px; left:0; right:0;
+  background: var(--surface); border-bottom:1px solid var(--border);
+  padding:12px 48px; display:flex; align-items:center; gap:20px; z-index:150;
+}
+.cd-label { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.25em; text-transform:uppercase; white-space:nowrap; }
+.cd-time { font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:700; color:var(--accent); letter-spacing:0.1em; min-width:110px; }
+.cd-time.warn { color:var(--accent2); }
+.cd-time.crit { color:var(--accent); animation:flashblink 0.5s steps(1) infinite; }
+@keyframes flashblink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.cd-bar-wrap { flex:1; height:2px; background:var(--border); }
+.cd-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:100%; transform-origin:left; transition:transform 1s linear; }
+.cd-status { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.15em; white-space:nowrap; }
+
+/* MAIN */
+main { padding-top: 80px; min-height:100vh; }
+
+/* STAGES */
+.stage {
+  display:none;
+  min-height: calc(100vh - 80px);
+  flex-direction:column; justify-content:center; align-items:center;
+  padding:60px 64px; position:relative; overflow:hidden;
+  animation: stageIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+.stage > * { width:100%; max-width:800px; }
+.stage.active { display:flex; }
+@keyframes stageIn {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.stage-bg {
+  position:absolute; font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(100px,18vw,280px); pointer-events:none;
+  line-height:1; letter-spacing:-0.02em;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  white-space:nowrap; opacity:0.03; color:var(--accent);
+}
+
+/* EYEBROW */
+.stage-eyebrow {
+  display:flex; align-items:center; gap:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:0.3em; text-transform:uppercase; margin-bottom:28px;
+}
+.dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+.eyebrow-text { color:var(--muted); }
+.eyebrow-text span { color:var(--accent); }
+
+/* TITLE */
+.stage-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,8vw,120px);
+  line-height:0.92; letter-spacing:0.01em; margin-bottom:32px;
+}
+.hl  { color:var(--accent); }
+.hl2 { color:var(--accent2); }
+.hl3 { color:var(--accent3); }
+.hlg { color:var(--green); }
+.dim { color:#333; }
+
+/* MESSAGE BUBBLE */
+.msg-bubble {
+  background:var(--surface); border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  padding:28px 32px; margin-bottom:28px; position:relative;
+}
+.msg-bubble.yellow { border-left-color:var(--accent2); }
+.msg-bubble.cyan   { border-left-color:var(--accent3); }
+.msg-bubble.green  { border-left-color:var(--green); }
+.msg-bubble.red    { border-left-color:var(--accent); background:rgba(255,60,0,0.04); }
+.msg-sender {
+  font-family:'IBM Plex Mono',monospace; font-size:10px;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;
+}
+.msg-bubble.yellow .msg-sender { color:var(--accent2); }
+.msg-bubble.cyan   .msg-sender { color:var(--accent3); }
+.msg-bubble.green  .msg-sender { color:var(--green); }
+.msg-text { font-size:18px; line-height:1.65; font-weight:300; color:#ccc; }
+.msg-text strong  { color:var(--text); font-weight:600; }
+.msg-text .danger { color:var(--accent); font-weight:600; }
+.msg-text .warn   { color:var(--accent2); font-weight:600; }
+.msg-text .ok     { color:var(--green); font-weight:600; }
+
+/* REQ LIST */
+.req-list { display:flex; flex-direction:column; gap:2px; margin-top:16px; }
+.req-item {
+  background:var(--surface); border:1px solid var(--border);
+  padding:16px 22px; display:flex; align-items:flex-start; gap:16px;
+  animation: reqIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+.req-item:nth-child(1){animation-delay:0.05s}
+.req-item:nth-child(2){animation-delay:0.1s}
+.req-item:nth-child(3){animation-delay:0.15s}
+.req-item:nth-child(4){animation-delay:0.2s}
+.req-item:nth-child(5){animation-delay:0.25s}
+@keyframes reqIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+.req-num { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.1em; min-width:26px; padding-top:2px; }
+.req-body { flex:1; }
+.req-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:3px; }
+.req-desc  { font-size:13px; color:var(--muted); line-height:1.4; }
+.req-tag {
+  font-family:'IBM Plex Mono',monospace; font-size:9px;
+  letter-spacing:0.2em; text-transform:uppercase;
+  padding:3px 8px; border-radius:2px; white-space:nowrap; align-self:flex-start; margin-top:2px;
+}
+.tag-r { background:rgba(255,60,0,0.12);  color:var(--accent);  border:1px solid rgba(255,60,0,0.25); }
+.tag-y { background:rgba(255,184,0,0.12); color:var(--accent2); border:1px solid rgba(255,184,0,0.25); }
+.tag-c { background:rgba(0,229,255,0.1);  color:var(--accent3); border:1px solid rgba(0,229,255,0.2); }
+.tag-g { background:rgba(0,255,136,0.1);  color:var(--green);   border:1px solid rgba(0,255,136,0.2); }
+
+/* CARDS GRID */
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:2px; margin-top:16px; }
+.card {
+  background:var(--surface); padding:24px 22px; border-top:2px solid var(--border);
+  animation: reqIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+.card:nth-child(1){animation-delay:0.05s;border-top-color:var(--accent3)}
+.card:nth-child(2){animation-delay:0.1s; border-top-color:var(--accent2)}
+.card:nth-child(3){animation-delay:0.15s;border-top-color:var(--accent)}
+.card-label { font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.25em; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+.card-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:0.03em; margin-bottom:12px; line-height:1; }
+.card ul { list-style:none; display:flex; flex-direction:column; gap:6px; }
+.card ul li { font-size:13px; color:#888; padding-left:14px; position:relative; line-height:1.4; }
+.card ul li::before { content:'—'; position:absolute; left:0; color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:11px; }
+.card ul li strong { color:var(--text); font-weight:600; }
+
+/* ALERT BOX */
+.alert-box {
+  background:rgba(255,60,0,0.05); border:1px solid rgba(255,60,0,0.3);
+  padding:24px 28px; margin-top:16px;
+  animation: alertPop 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.alert-box.yellow { background:rgba(255,184,0,0.05); border-color:rgba(255,184,0,0.3); }
+.alert-box.green  { background:rgba(0,255,136,0.04);  border-color:rgba(0,255,136,0.25); }
+@keyframes alertPop { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+.alert-header { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+.alert-box.yellow .alert-header { color:var(--accent2); }
+.alert-box.green  .alert-header { color:var(--green); }
+.alert-body { font-size:15px; line-height:1.6; color:#bbb; font-weight:300; }
+.alert-body strong { color:var(--text); font-weight:600; }
+
+/* EVAL GRID */
+.eval-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(196px,1fr)); gap:2px; margin-top:20px; }
+.eval-item {
+  background:var(--surface); padding:22px 20px;
+  animation: reqIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
+}
+.eval-item:nth-child(1){animation-delay:0.04s}
+.eval-item:nth-child(2){animation-delay:0.08s}
+.eval-item:nth-child(3){animation-delay:0.12s}
+.eval-item:nth-child(4){animation-delay:0.16s}
+.eval-item:nth-child(5){animation-delay:0.20s}
+.eval-item:nth-child(6){animation-delay:0.24s}
+.eval-item:nth-child(7){animation-delay:0.28s}
+.eval-item:nth-child(8){animation-delay:0.32s}
+.eval-n { font-family:'Bebas Neue',sans-serif; font-size:42px; line-height:1; color:rgba(255,60,0,0.12); margin-bottom:6px; }
+.eval-title { font-size:14px; font-weight:600; color:var(--text); margin-bottom:4px; }
+.eval-desc  { font-size:12px; color:var(--muted); line-height:1.4; }
+
+/* PROFESSOR CONTROLS */
+#prof-controls {
+  position:fixed; bottom:24px; right:24px;
+  display:flex; flex-direction:column; align-items:flex-end; gap:8px; z-index:500;
+}
+.prof-toggle {
+  width:34px; height:34px; background:rgba(10,10,10,0.95);
+  border:1px solid #2a2a2a; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; transition:border-color 0.2s; user-select:none;
+}
+.prof-toggle:hover { border-color:var(--muted); }
+.prof-box {
+  background:#0d0d0d; border:1px solid #222;
+  padding:14px 16px; display:none; flex-direction:column; gap:6px;
+  min-width:210px; box-shadow:0 8px 40px rgba(0,0,0,0.8);
+}
+.prof-box.open { display:flex; }
+.prof-box-title { font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:0.3em; text-transform:uppercase; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.stage-btn {
+  background:var(--surface); border:1px solid var(--border); color:#888;
+  font-family:'IBM Plex Mono',monospace; font-size:11px;
+  padding:9px 12px; cursor:pointer; text-align:left;
+  letter-spacing:0.04em; transition:all 0.15s;
+  display:flex; align-items:center; gap:8px;
+}
+.stage-btn:hover { background:#161616; color:var(--text); border-color:var(--muted); }
+.stage-btn.current { border-color:rgba(255,184,0,0.5); color:var(--accent2); }
+.stage-btn.done    { opacity:0.3; }
+.sb-dot { width:5px; height:5px; border-radius:50%; background:var(--border); flex-shrink:0; }
+.stage-btn.current .sb-dot { background:var(--accent2); }
+.stage-btn.done    .sb-dot { background:var(--green); }
+.next-btn {
+  background:var(--accent); border:none; color:#fff;
+  font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+  padding:12px 16px; cursor:pointer; letter-spacing:0.15em; text-transform:uppercase;
+  transition:background 0.15s; width:100%; text-align:center; margin-top:4px;
+}
+.next-btn:hover   { background:#e03600; }
+.next-btn:disabled { background:var(--muted); cursor:default; }
+
+@media (max-width:640px) {
+  .stage { padding:40px 20px; }
+  .countdown-strip { padding:10px 16px; }
+  .cd-time { font-size:18px; min-width:90px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    &nbsp;&nbsp;🔴 ATENÇÃO — APRESENTAÇÃO PARA A DIRETORIA HOJE &nbsp;///&nbsp; SISTEMA SEM VISÃO GERENCIAL &nbsp;///&nbsp; SPRINT EM ANDAMENTO &nbsp;///&nbsp; INVESTIDORES AGUARDAM &nbsp;///&nbsp;
+    &nbsp;&nbsp;🔴 ATENÇÃO — APRESENTAÇÃO PARA A DIRETORIA HOJE &nbsp;///&nbsp; SISTEMA SEM VISÃO GERENCIAL &nbsp;///&nbsp; SPRINT EM ANDAMENTO &nbsp;///&nbsp; INVESTIDORES AGUARDAM &nbsp;///&nbsp;
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="countdown-strip">
+  <span class="cd-label">tempo restante</span>
+  <span class="cd-time" id="cd-time">--:--:--</span>
+  <div class="cd-bar-wrap"><div class="cd-bar-fill" id="cd-fill"></div></div>
+  <span class="cd-status" id="cd-status">aguardando início</span>
+</div>
+
+<main>
+
+<!-- ── ETAPA 0 · ABERTURA ── -->
+<section class="stage active" id="stage-0">
+  <div class="stage-bg">ALERTA</div>
+  <div class="stage-eyebrow">
+    <div class="dot"></div>
+    <div class="eyebrow-text"><span>MENSAGEM RECEBIDA</span> — cliente · agora</div>
+  </div>
+  <h1 class="stage-title">
+    <div>PRECISO</div>
+    <div class="hl">DE VOCÊS</div>
+    <div class="dim">AGORA.</div>
+  </h1>
+  <div class="msg-bubble">
+    <div class="msg-sender">📱 diretor comercial — há 2 minutos</div>
+    <div class="msg-text">
+      Pessoal, <strong>temos uma reunião com investidores hoje à noite</strong> e precisamos apresentar os indicadores do sistema.<br><br>
+      O problema: <span class="danger">o sistema não tem nenhum painel gerencial.</span> Só tela de cadastro e listagem.<br><br>
+      Precisamos que vocês construam isso <strong>até às 21h</strong>. A diretoria quer <strong>dados reais, organizados e apresentáveis.</strong>
+    </div>
+  </div>
+  <div class="alert-box yellow">
+    <div class="alert-header">⚡ missão</div>
+    <div class="alert-body">
+      Construir um <strong>dashboard gerencial completo</strong> para o sistema de demandas.<br>
+      Os requisitos chegam em instantes. <strong>Organizem a equipe agora.</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 1 · KPIs ── -->
+<section class="stage" id="stage-1">
+  <div class="stage-bg">KPIs</div>
+  <div class="stage-eyebrow" style="color:var(--accent2)">
+    <div class="dot" style="background:var(--accent2)"></div>
+    <div class="eyebrow-text"><span style="color:var(--accent2)">REQUISITOS</span> — fase 1</div>
+  </div>
+  <h1 class="stage-title">
+    <div>O QUE</div>
+    <div class="hl2">PRECISAMOS</div>
+  </h1>
+  <div class="msg-bubble yellow">
+    <div class="msg-sender">📱 diretor comercial — agora</div>
+    <div class="msg-text">
+      Ok, vou passar o que a diretoria precisa ver.<br><br>
+      <strong>Primeiro: os números gerais do sistema.</strong> Um painel com os principais KPIs de demandas.
+    </div>
+  </div>
+  <div class="req-list">
+    <div class="req-item">
+      <div class="req-num">01</div>
+      <div class="req-body"><div class="req-title">Total de demandas</div><div class="req-desc">Número em destaque, visível de longe</div></div>
+      <div class="req-tag tag-c">KPI</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">02</div>
+      <div class="req-body"><div class="req-title">Abertas · Concluídas · Atrasadas</div><div class="req-desc">Separadas, com contagem e percentual</div></div>
+      <div class="req-tag tag-c">KPI</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">03</div>
+      <div class="req-body"><div class="req-title">Demandas críticas</div><div class="req-desc">Quantas, quem são, qual o status atual</div></div>
+      <div class="req-tag tag-r">ATENÇÃO</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">04</div>
+      <div class="req-body"><div class="req-title">Por responsável</div><div class="req-desc">Quantas demandas cada pessoa tem em aberto</div></div>
+      <div class="req-tag tag-c">KPI</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">05</div>
+      <div class="req-body"><div class="req-title">Tempo médio de resolução</div><div class="req-desc">Em dias. Só concluídas — canceladas ficam fora</div></div>
+      <div class="req-tag tag-y">REGRA</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 2 · GRÁFICOS + FILTROS ── -->
+<section class="stage" id="stage-2">
+  <div class="stage-bg">FILTROS</div>
+  <div class="stage-eyebrow" style="color:var(--accent2)">
+    <div class="dot" style="background:var(--accent2)"></div>
+    <div class="eyebrow-text"><span style="color:var(--accent2)">REQUISITOS</span> — fase 2</div>
+  </div>
+  <h1 class="stage-title">
+    <div>GRÁFICOS</div>
+    <div class="hl2">E FILTROS</div>
+  </h1>
+  <div class="msg-bubble yellow">
+    <div class="msg-sender">📱 diretor comercial — agora</div>
+    <div class="msg-text">
+      Números sozinhos não convencem.<br>
+      Precisa de <strong>gráficos visuais e a possibilidade de filtrar os dados.</strong>
+    </div>
+  </div>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-label">Gráficos obrigatórios</div>
+      <div class="card-title" style="color:var(--accent3)">VISUAL</div>
+      <ul>
+        <li>Por <strong>status</strong></li>
+        <li>Por <strong>prioridade</strong></li>
+        <li>Evolução <strong>temporal</strong></li>
+        <li>Atualização <strong>dinâmica</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-label">Filtros — todos juntos</div>
+      <div class="card-title" style="color:var(--accent2)">FILTROS</div>
+      <ul>
+        <li>Por <strong>período</strong></li>
+        <li>Por <strong>responsável</strong></li>
+        <li>Por <strong>prioridade</strong></li>
+        <li>Por <strong>status</strong></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-label">Regras de negócio</div>
+      <div class="card-title" style="color:var(--accent)">LÓGICA</div>
+      <ul>
+        <li><strong>Atrasadas</strong> aparecem em vermelho</li>
+        <li><strong>Sem responsável</strong> fora do SLA</li>
+        <li>Críticas <strong>pesam mais</strong> na média</li>
+        <li><strong>Canceladas</strong> fora do tempo médio</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 3 · EXPORTAÇÃO ── -->
+<section class="stage" id="stage-3">
+  <div class="stage-bg">EXPORT</div>
+  <div class="stage-eyebrow">
+    <div class="dot"></div>
+    <div class="eyebrow-text"><span>NOVO PEDIDO</span> — fase 3</div>
+  </div>
+  <h1 class="stage-title">
+    <div>PRECISAMOS</div>
+    <div class="hl">EXPORTAR</div>
+    <div class="dim">TAMBÉM.</div>
+  </h1>
+  <div class="msg-bubble red">
+    <div class="msg-sender">📱 diretor comercial — agora</div>
+    <div class="msg-text">
+      Ah, quase esqueci —<br><span class="danger">a diretoria vai querer levar o relatório impresso para a reunião.</span><br><br>
+      Precisa ter opção de <strong>exportar em PDF ou Excel.</strong>
+    </div>
+  </div>
+  <div class="req-list">
+    <div class="req-item">
+      <div class="req-num">01</div>
+      <div class="req-body"><div class="req-title">PDF ou CSV ou Excel</div><div class="req-desc">Pelo menos um formato funcionando</div></div>
+      <div class="req-tag tag-r">OBRIGATÓRIO</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">02</div>
+      <div class="req-body"><div class="req-title">Cabeçalho com nome da empresa</div><div class="req-desc">E data de geração do relatório</div></div>
+      <div class="req-tag tag-y">DETALHE</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">03</div>
+      <div class="req-body"><div class="req-title">Filtros aplicados no rodapé</div><div class="req-desc">"Relatório gerado com: Prioridade Alta · Jan–Mar 2025"</div></div>
+      <div class="req-tag tag-y">DETALHE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 4 · SURPRESA — MUDANÇA DE REQUISITO ── -->
+<section class="stage" id="stage-4">
+  <div class="stage-bg" style="color:var(--accent2)">MUDANÇA</div>
+  <div class="stage-eyebrow" style="color:var(--accent2)">
+    <div class="dot" style="background:var(--accent2)"></div>
+    <div class="eyebrow-text"><span style="color:var(--accent2)">MENSAGEM URGENTE</span> — diretor · agora</div>
+  </div>
+  <h1 class="stage-title">
+    <div class="dim">MUDANÇA</div>
+    <div class="hl2">DE ÚLTIMA</div>
+    <div class="hl2">HORA.</div>
+  </h1>
+  <div class="msg-bubble yellow">
+    <div class="msg-sender">📱 diretor comercial — URGENTE</div>
+    <div class="msg-text">
+      Pessoal, acabei de falar com a diretoria.<br><br>
+      <span class="warn">Eles querem focar nas demandas críticas que estão atrasadas.</span><br><br>
+      Preciso que o dashboard mostre isso <strong>em destaque, separado do resto.</strong> E o relatório exportado tem que trazer só esses casos.
+    </div>
+  </div>
+  <div class="alert-box yellow">
+    <div class="alert-header">⚡ o que muda agora</div>
+    <div class="alert-body">
+      Adicionar uma <strong>visão dedicada: críticas + atrasadas.</strong><br>
+      A exportação deve respeitar esse filtro. <strong>Vocês têm até 21h.</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 5 · SURPRESA — DADOS INCONSISTENTES ── -->
+<section class="stage" id="stage-5">
+  <div class="stage-bg">ERRO</div>
+  <div class="stage-eyebrow">
+    <div class="dot"></div>
+    <div class="eyebrow-text"><span>ALERTA TÉCNICO</span> — TI · agora</div>
+  </div>
+  <h1 class="stage-title">
+    <div>PROBLEMA</div>
+    <div class="hl">NO BANCO</div>
+    <div class="dim">DE DADOS.</div>
+  </h1>
+  <div class="msg-bubble red">
+    <div class="msg-sender">📱 diretor de TI — agora</div>
+    <div class="msg-text">
+      Acabamos de identificar um problema no banco:<br><br>
+      <span class="danger">Existem demandas sem status, datas de criação inválidas e responsáveis que foram deletados do sistema.</span><br><br>
+      O dashboard não pode travar nem mostrar dados errados por causa disso.
+    </div>
+  </div>
+  <div class="req-list">
+    <div class="req-item">
+      <div class="req-num">01</div>
+      <div class="req-body"><div class="req-title">Demandas sem status</div><div class="req-desc">Não devem quebrar o dashboard — tratar como "indefinido"</div></div>
+      <div class="req-tag tag-r">BUG</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">02</div>
+      <div class="req-body"><div class="req-title">Datas inválidas</div><div class="req-desc">Ignorar no cálculo de SLA, sem exibir erro na tela</div></div>
+      <div class="req-tag tag-r">BUG</div>
+    </div>
+    <div class="req-item">
+      <div class="req-num">03</div>
+      <div class="req-body"><div class="req-title">Responsável deletado</div><div class="req-desc">Mostrar como "Sem responsável" — não pode crashar</div></div>
+      <div class="req-tag tag-r">BUG</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 6 · PITCH ── -->
+<section class="stage" id="stage-6">
+  <div class="stage-bg" style="color:var(--green)">PITCH</div>
+  <div class="stage-eyebrow" style="color:var(--green)">
+    <div class="dot" style="background:var(--green)"></div>
+    <div class="eyebrow-text"><span style="color:var(--green)">HORA DA VERDADE</span> — 21:00</div>
+  </div>
+  <h1 class="stage-title">
+    <div class="dim">CÓDIGO</div>
+    <div class="hlg">CONGELADO.</div>
+    <div>APRESENTEM.</div>
+  </h1>
+  <div class="msg-bubble green">
+    <div class="msg-sender">📱 diretor comercial — 21:00</div>
+    <div class="msg-text">
+      Pessoal, a reunião começa agora.<br><br>
+      <span class="ok">Cada equipe tem 5 minutos.</span> Mostrem o dashboard como se fossem vender para a diretoria.<br><br>
+      <strong>O que funciona, mostrem. O que não deu tempo, expliquem por quê — e o que priorizariam a seguir.</strong>
+    </div>
+  </div>
+  <div class="alert-box green">
+    <div class="alert-header">🎯 o que apresentar</div>
+    <div class="alert-body">
+      O que foi entregue &nbsp;·&nbsp; Decisões técnicas tomadas &nbsp;·&nbsp; O que a IA resolveu vs. não resolveu &nbsp;·&nbsp; O que faria diferente com mais tempo
+    </div>
+  </div>
+</section>
+
+<!-- ── ETAPA 7 · RETROSPECTIVA ── -->
+<section class="stage" id="stage-7">
+  <div class="stage-bg" style="color:var(--accent3)">RETRO</div>
+  <div class="stage-eyebrow" style="color:var(--accent3)">
+    <div class="dot" style="background:var(--accent3)"></div>
+    <div class="eyebrow-text"><span style="color:var(--accent3)">RETROSPECTIVA</span> — debriefing</div>
+  </div>
+  <h1 class="stage-title">
+    <div>O QUE</div>
+    <div class="hl3">APRENDEMOS</div>
+    <div class="dim">HOJE?</div>
+  </h1>
+  <div class="msg-bubble cyan">
+    <div class="msg-sender">🎓 professor — retrospectiva coletiva</div>
+    <div class="msg-text">
+      Vamos refletir sobre o que aconteceu nessa sprint.<br><strong>Sem julgamento — só aprendizado.</strong>
+    </div>
+  </div>
+  <div class="eval-grid">
+    <div class="eval-item"><div class="eval-n">01</div><div class="eval-title">Arquitetura</div><div class="eval-desc">Como estruturaram? Separação de responsabilidades?</div></div>
+    <div class="eval-item"><div class="eval-n">02</div><div class="eval-title">SQL & Backend</div><div class="eval-desc">Queries funcionaram? Regras de negócio no lugar certo?</div></div>
+    <div class="eval-item"><div class="eval-n">03</div><div class="eval-title">Frontend & UX</div><div class="eval-desc">A diretoria entenderia sem explicação?</div></div>
+    <div class="eval-item"><div class="eval-n">04</div><div class="eval-title">Decisão sob pressão</div><div class="eval-desc">O que foi priorizado? O que foi descartado? Por quê?</div></div>
+    <div class="eval-item"><div class="eval-n">05</div><div class="eval-title">Divisão de tarefas</div><div class="eval-desc">Trabalharam em paralelo ou em fila?</div></div>
+    <div class="eval-item"><div class="eval-n">06</div><div class="eval-title">Reação ao imprevisto</div><div class="eval-desc">Adaptaram à mudança de requisito ou travaram?</div></div>
+    <div class="eval-item"><div class="eval-n">07</div><div class="eval-title">Uso da IA</div><div class="eval-desc">Onde ajudou de verdade? Onde atrasou ou enganou?</div></div>
+    <div class="eval-item"><div class="eval-n">08</div><div class="eval-title">Comunicação</div><div class="eval-desc">Conseguiram explicar decisões técnicas para um não-técnico?</div></div>
+  </div>
+</section>
+
+</main>
+
+<!-- PROFESSOR CONTROLS -->
+<div id="prof-controls">
+  <div class="prof-toggle" id="prof-toggle" title="Controles">⚙</div>
+  <div class="prof-box" id="prof-box">
+    <div class="prof-box-title">// professor · controle</div>
+    <button class="stage-btn" id="sbtn-0" onclick="goTo(0)"><div class="sb-dot"></div>Abertura</button>
+    <button class="stage-btn" id="sbtn-1" onclick="goTo(1)"><div class="sb-dot"></div>KPIs básicos</button>
+    <button class="stage-btn" id="sbtn-2" onclick="goTo(2)"><div class="sb-dot"></div>Gráficos + Filtros</button>
+    <button class="stage-btn" id="sbtn-3" onclick="goTo(3)"><div class="sb-dot"></div>Exportação</button>
+    <button class="stage-btn" id="sbtn-4" onclick="goTo(4)"><div class="sb-dot"></div>⚡ Surpresa — mudança</button>
+    <button class="stage-btn" id="sbtn-5" onclick="goTo(5)"><div class="sb-dot"></div>⚡ Surpresa — dados</button>
+    <button class="stage-btn" id="sbtn-6" onclick="goTo(6)"><div class="sb-dot"></div>🎯 Pitch final</button>
+    <button class="stage-btn" id="sbtn-7" onclick="goTo(7)"><div class="sb-dot"></div>Retrospectiva</button>
+    <button class="next-btn" id="next-btn" onclick="nextStage()">PRÓXIMA ETAPA →</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 8;
+let current = 0;
+
+document.getElementById('prof-toggle').addEventListener('click', () => {
+  document.getElementById('prof-box').classList.toggle('open');
+});
+
+function goTo(n) {
+  if (n < 0 || n >= TOTAL) return;
+  document.getElementById('stage-' + current).classList.remove('active');
+  current = n;
+  const next = document.getElementById('stage-' + current);
+  next.classList.add('active');
+  updateBtns();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStage() { if (current < TOTAL - 1) goTo(current + 1); }
+
+function updateBtns() {
+  for (let i = 0; i < TOTAL; i++) {
+    const b = document.getElementById('sbtn-' + i);
+    b.classList.remove('current', 'done');
+    if (i === current) b.classList.add('current');
+    else if (i < current) b.classList.add('done');
+  }
+  document.getElementById('next-btn').disabled = current === TOTAL - 1;
+}
+
+// Countdown to 22:00
+function pad(n) { return String(n).padStart(2,'0'); }
+function updateCountdown() {
+  const now   = new Date();
+  const start = new Date(); start.setHours(19,30,0,0);
+  const end   = new Date(); end.setHours(22,0,0,0);
+  const total = end - start;
+  const rem   = end - now;
+  const el    = document.getElementById('cd-time');
+  const fill  = document.getElementById('cd-fill');
+  const stat  = document.getElementById('cd-status');
+
+  if (rem <= 0) {
+    el.textContent = '00:00:00'; el.className = 'cd-time crit';
+    stat.textContent = 'tempo esgotado';
+    fill.style.transform = 'scaleX(0)'; return;
+  }
+  if (now < start) {
+    const ts = start - now;
+    el.textContent = `${pad(Math.floor(ts/3600000))}:${pad(Math.floor((ts%3600000)/60000))}:${pad(Math.floor((ts%60000)/1000))}`;
+    el.className = 'cd-time'; stat.textContent = 'até o início';
+    fill.style.transform = 'scaleX(1)'; return;
+  }
+  const h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
+  el.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  fill.style.transform = `scaleX(${Math.max(0, rem/total)})`;
+  if      (rem < 600000)  { el.className = 'cd-time crit'; stat.textContent = '⚠ atenção ao tempo'; }
+  else if (rem < 1800000) { el.className = 'cd-time warn'; stat.textContent = 'fase final'; }
+  else                    { el.className = 'cd-time';      stat.textContent = 'sprint em andamento'; }
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+updateBtns();
+</script>
+</body>
+</html>

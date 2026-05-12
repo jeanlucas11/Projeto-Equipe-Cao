@@ -18,7 +18,9 @@
         <p><strong>Solicitante:</strong><br>{{ demanda[3] }}</p>
         <p><strong>Data de Criação:</strong><br>{{ demanda[4] }}</p>
         <p><strong>Nível de Prioridade:</strong><br>
-            {% if demanda[5]|lower == 'alta' %}
+            {% if demanda[5]|lower in ['crítica','critica'] %}
+                <span class="badge badge-critica" style="background:#dc3545; color:#fff;">Crítica</span>
+            {% elif demanda[5]|lower == 'alta' %}
                 <span class="badge badge-alta">Alta</span>
             {% elif demanda[5]|lower in ['média','media'] %}
                 <span class="badge badge-media">Média</span>
