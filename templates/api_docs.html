@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2>Documentação da API REST</h2>
+    <span class="badge badge-baixa">OpenAPI 3.0</span>
+</div>
+
+<p style="color: var(--text-muted); margin-bottom: 30px;">
+    Explore e teste os endpoints da API REST do SGDI diretamente pelo console interativo. Para testar rotas que exigem autorização, certifique-se de gerar uma chave na página <a href="/api_keys">Chaves API</a> e adicioná-la no botão <strong>Authorize</strong> com a palavra chave <code>Bearer</code> seguida da chave de API (ex: <code>Bearer sgdi_key_...</code>).
+</p>
+
+<!-- Swagger UI Styles and Scripts from CDN -->
+<link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css">
+<style>
+    /* Customization to align Swagger UI with SGDI styling */
+    .swagger-ui {
+        font-family: inherit;
+        background: #fff;
+        border-radius: 8px;
+        padding: 10px;
+    }
+    .swagger-ui .info {
+        margin: 20px 0 !important;
+    }
+    .swagger-ui .info .title {
+        font-family: inherit;
+        color: var(--text-main);
+    }
+    .swagger-ui .scheme-container {
+        background: var(--bg-color) !important;
+        box-shadow: none !important;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        margin: 20px 0;
+        padding: 15px !important;
+    }
+    .swagger-ui button.authorize {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        color: white !important;
+        border-radius: 4px !important;
+    }
+    .swagger-ui button.authorize svg {
+        fill: white !important;
+    }
+    .swagger-ui .opblock {
+        border-radius: 6px !important;
+    }
+</style>
+
+<div class="detail-card" style="padding: 15px;">
+    <div id="swagger-ui"></div>
+</div>
+
+<script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js" charset="UTF-8"></script>
+<script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+<script>
+    window.onload = function() {
+        // Build a system
+        const ui = SwaggerUIBundle({
+            url: "/static/openapi.json",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "BaseLayout"
+        });
+        window.ui = ui;
+    };
+</script>
+{% endblock %}

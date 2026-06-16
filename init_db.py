@@ -6,6 +6,7 @@ cursor = conn.cursor()
 cursor.execute("DROP TABLE IF EXISTS demandas")
 cursor.execute("DROP TABLE IF EXISTS comentarios")
 cursor.execute("DROP TABLE IF EXISTS solicitantes")
+cursor.execute("DROP TABLE IF EXISTS api_keys")
 
 cursor.execute('''
 CREATE TABLE demandas (
@@ -39,6 +40,17 @@ CREATE TABLE solicitantes (
     senha TEXT
 )
 ''')
+
+cursor.execute('''
+CREATE TABLE api_keys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    data_criacao TEXT NOT NULL
+)
+''')
+
+cursor.execute("INSERT INTO api_keys (nome, token, data_criacao) VALUES (?, ?, ?)", ('Chave de Teste', 'sgdi_mock_key_2026', '2026-06-15 08:00:00'))
 
 # Mock data for Sprint Emergencial
 mock_demandas = [

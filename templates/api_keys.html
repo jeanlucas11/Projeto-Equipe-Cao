@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-container"
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h2>Chaves de API (Integração)</h2>
+    <span class="badge badge-alta">Segurança Ativa</span>
+</div>
+
+<p style="color: var(--text-muted); margin-bottom: 30px;">
+    Gere chaves de API seguras para permitir que sistemas externos acessem e manipulem dados de demandas e solicitantes
+    do SGDI de forma segura.
+</p>
+
+<!-- Formulário de Criação -->
+<div class="detail-card" style="margin-bottom: 30px; border-left: 4px solid var(--primary-color);">
+    <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px;">Gerar Nova Chave</h3>
+    <form action="/api_keys/gerar" method="POST" style="display: flex; gap: 15px; align-items: flex-end;">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="nome"
+                style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;">Identificador
+                / Nome do Sistema</label>
+            <input type="text" id="nome" name="nome"
+                placeholder="Ex: Sistema CRM, Dashboard PowerBI, Hub de Integração..." required style="height: 42px;">
+        </div>
+        <button type="submit" class="btn" style="height: 42px; padding: 0 24px; white-space: nowrap;">
+            Gerar Chave
+        </button>
+    </form>
+</div>
+
+<!-- Lista de Chaves Ativas -->
+<div class="detail-card">
+    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px;">Chaves de API Ativas</h3>
+
+    {% if api_keys %}
+    <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Nome / Destinatário</th>
+                <th style="width: 45%;">Chave de Acesso (Token Bearer)</th>
+                <th style="width: 15%;">Criada Em</th>
+                <th style="width: 15%; text-align: center;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key in api_keys %}
+            <tr>
+                <td style="font-weight: 600; color: var(--text-main);">{{ key.nome }}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="password" value="{{ key.token }}" readonly class="api-token-input"
+                            id="token-{{ key.id }}"
+                            style="font-family: monospace; font-size: 13px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 4px; padding: 6px 10px; width: 100%; color: var(--text-main);">
+
+                        <button type="button" onclick="toggleVisibility({{ key.id }})" class="btn-secondary"
+                            style="padding: 6px 12px; font-size: 12px; background-color: #64748b; color: #fff; border-radius: 4px; line-height: 1;">
+                            👁️
+                        </button>
+
+                        <button type="button" onclick="copyToken('token-{{ key.id }}')" class="btn-secondary"
+                            style="padding: 6px 12px; font-size: 12px; background-color: var(--primary-color); color: #fff; border-radius: 4px; line-height: 1;">
+                            Copiar
+                        </button>
+                    </div>
+                </td>
+                <td style="font-size: 13px; color: var(--text-muted);">{{ key.data_criacao }}</td>
+                <td style="text-align: center;">
+                    <a href="/api_keys/deletar/{{ key.id }}" class="btn btn-danger"
+                        style="padding: 6px 12px; font-size: 12px; border-radius: 4px; line-height: 1;"
+                        onclick="return confirm('Tem certeza que deseja revogar esta chave de API? Sistemas que utilizam essa chave perderão o acesso imediatamente.');">
+                        Revogar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+        <p style="margin: 0; font-size: 15px;">Nenhuma chave de API ativa. Gere uma chave acima para começar a integrar.
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleVisibility(id) {
+        var input = document.getElementById('token-' + id);
+        if (input.type === "password") {
+            input.type = "text";
+        } else {
+            input.type = "password";
+        }
+    }
+
+    function copyToken(inputId) {
+        var copyText = document.getElementById(inputId);
+
+        // Temporarily change type to copy if password
+        var originalType = copyText.type;
+        copyText.type = "text";
+
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+
+        navigator.clipboard.writeText(copyText.value).then(function () {
+            alert("Token copiado para a área de transferência!");
+            copyText.type = originalType;
+        }, function (err) {
+            // Fallback
+            document.execCommand("copy");
+            alert("Token copiado para a área de transferência!");
+            copyText.type = originalType;
+        });
+    }
+</script>
+{% endblock %}
